@@ -30,7 +30,7 @@ echo "Latest build id: $buildId"
 for file in $files; do
     fileName=$(echo "$file" | jq -r '.fileName')
     fileId=$(echo "$file" | jq -r '.id')
-    downloadLink="https://api.infernalsuite.com/v1/projects/aspurpur/${buildId}/download/${fileId}"
+    downloadLink="https://api.infernalsuite.com/v1/projects/$project/$buildId/download/$fileId"
 
     echo "Downloading [$fileName] from $downloadLink"
 
