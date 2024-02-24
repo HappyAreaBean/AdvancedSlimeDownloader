@@ -13,14 +13,16 @@ echo "Selected version $mcVersion"
 echo "Selected project $project"
 
 # Retrieve JSON data from the URL
-json_url="https://api.infernalsuite.com/v1/projects/$project/mcversion/$mcVersion/latest"
+#json_url="https://api.infernalsuite.com/v1/projects/$project/mcversion/$mcVersion/latest" # This api endpoint always return asp project
+json_url="https://api.infernalsuite.com/v1/projects/$project/mcversion/$mcVersion"
 json_data=$(curl -s "$json_url")
 
 # Parse JSON and construct download links
-files=$(echo "$json_data" | jq -c '.files[]')
-buildId=$(echo "$json_data" | jq -r '.id')
+buildData=$(echo "$json_data" | jq -r '.[1]')
+files=$(echo "$buildData" | jq -c '.files[]')
+buildId=$(echo "$buildData" | jq -r '.id')
 
-if [ "$buildId" == "null" ]; then
+if [ "$buildId" == "null" ] || [ "$buildId" == "" ]; then
     echo "Build ID cannot be found. Cancelling."
     exit 0
 fi
