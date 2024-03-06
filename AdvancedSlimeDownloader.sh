@@ -2,27 +2,40 @@
 
 mcVersion=$1
 project=$2
+branchName=$3
 
-if [ -z "$mcVersion" ] || [ -z "$project" ]; then
-    echo "mcVersion and project cannot be null."
-    echo "Usage ./AdvancedSlimeDownloader.sh <mcVersion> <project>"
+if [ -z "$mcVersion" ] || [ -z "$project" ] || [ -z "$branchName" ]; then
+    echo "mcVersion, project, and branchName cannot be null."
+    echo "Usage ./AdvancedSlimeDownloader.sh <mcVersion> <project> <branchName>"
     exit 0
 fi
 
 echo "Selected version $mcVersion"
 echo "Selected project $project"
+echo "Selected branch $branchName"
 
 # Retrieve JSON data from the URL
-#json_url="https://api.infernalsuite.com/v1/projects/$project/mcversion/$mcVersion/latest" # This api endpoint always return asp project
+#json_url="https://api.infernalsuite.com/v1/projects/$project/mcversion/$mcVersion/latest" # This api endpoint atm return the wrong build files
 json_url="https://api.infernalsuite.com/v1/projects/$project/mcversion/$mcVersion"
 json_data=$(curl -s "$json_url")
 
-# Parse JSON and construct download links
-buildData=$(echo "$json_data" | jq -r '.[1]')
-files=$(echo "$buildData" | jq -c '.files[]')
-buildId=$(echo "$buildData" | jq -r '.id')
+# Filter JSON data based on branch name and select the most recent build
+filtered_data=$(echo "$json_data" | jq -r ".[] | select(.branch == \"$branchName\")")
 
-if [ "$buildId" == "null" ] || [ "$buildId" == "" ]; then
+# Check if the filtered data is empty
+if [ -z "$filtered_data" ]; then
+    echo "Branch '$branchName' not found. Cancelling."
+    exit 0
+fi
+
+sorted_data=$(echo "$filtered_data" | jq -s "sort_by(.date)[]")
+last=$(echo "$sorted_data" | jq -s "last")
+
+# Extract necessary information from the filtered data
+files=$(echo "$last" | jq -c '.files[]')
+buildId=$(echo "$last" | jq -r '.id')
+
+if [ "$buildId" == "null" ] || [ -z "$buildId" ]; then
     echo "Build ID cannot be found. Cancelling."
     exit 0
 fi

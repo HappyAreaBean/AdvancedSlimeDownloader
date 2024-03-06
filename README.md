@@ -5,11 +5,12 @@ This script allows you to download files from the Infernal Suite API based on Mi
 ## Usage
 
 ```bash
-./AdvancedSlimeDownloader.sh <mcVersion> <project>
+./AdvancedSlimeDownloader.sh <mcVersion> <project> <branchName>
 ```
 
 - `mcVersion`: Minecraft version (e.g., 1.20.4)
 - `project`: Project name (e.g., asp, aspufferfish, aspurpur)
+- `branchName`: Branch name (Check [here][branchApi] for available branches)
 
 ## Prerequisites
 
@@ -40,7 +41,7 @@ curl -O https://raw.githubusercontent.com/HappyAreaBean/AdvancedSlimeDownloader/
 ## Usage Example
 
 ```bash
-./AdvancedSlimeDownloader.sh 1.20.4 aspurpur
+./AdvancedSlimeDownloader.sh 1.20.4 aspurpur purpur_upstream
 ```
 
 ## Description
@@ -52,3 +53,5 @@ curl -O https://raw.githubusercontent.com/HappyAreaBean/AdvancedSlimeDownloader/
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+[branchApi]: https://api.infernalsuite.com/swagger/index.html#operations-DynamicProject-get_v1_projects__projectSlug__mcversion__version__branches
