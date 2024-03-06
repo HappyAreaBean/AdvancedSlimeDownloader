@@ -23,7 +23,7 @@ This script allows you to download files from the Infernal Suite API based on Mi
 1. Clone this repository:
 
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/HappyAreaBean/AdvancedSlimeDownloader.git
     ```
 
 2. Make the script executable:
