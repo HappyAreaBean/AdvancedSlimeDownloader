@@ -2,6 +2,12 @@
 
 This script allows you to download files from the Infernal Suite API based on Minecraft versions and projects.
 
+## Pterodactyl Egg
+
+Pterodactyl Egg is now available!
+
+[egg-advanced-slime.json](egg-advanced-slime.json)
+
 ## Usage
 
 ```bash
