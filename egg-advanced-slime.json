@@ -1,0 +1,79 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2024-03-20T17:51:45+08:00",
+    "name": "AdvancedSlime",
+    "author": "bean@happyareabean.cc",
+    "description": "Advanced Slime World Manager as a Paper\/Purpur\/Pufferfish Fork.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 17": "ghcr.io\/pterodactyl\/yolks:java_17",
+        "Java 16": "ghcr.io\/pterodactyl\/yolks:java_16",
+        "Java 11": "ghcr.io\/pterodactyl\/yolks:java_11",
+        "Java 8": "ghcr.io\/pterodactyl\/yolks:java_8"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# AdvancedSlime Paper\/PurPur\/Pufferfish Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\nmcVersion=${MINECRAFT_VERSION}\r\nproject=${PROJECT_NAME}\r\nbranchName=${BRANCH_NAME}\r\n\r\necho \"Selected version $mcVersion\"\r\necho \"Selected project $project\"\r\necho \"Selected branch $branchName\"\r\n\r\n# Retrieve JSON data from the URL\r\n#json_url=\"https:\/\/api.infernalsuite.com\/v1\/projects\/$project\/mcversion\/$mcVersion\/latest\" # This api endpoint atm return the wrong build files\r\njson_url=\"https:\/\/api.infernalsuite.com\/v1\/projects\/$project\/mcversion\/$mcVersion\"\r\njson_data=$(curl -s \"$json_url\")\r\n\r\n# Filter JSON data based on branch name and select the most recent build\r\nfiltered_data=$(echo \"$json_data\" | jq -r \".[] | select(.branch == \\\"$branchName\\\")\")\r\n\r\n# Check if the filtered data is empty\r\nif [ -z \"$filtered_data\" ]; then\r\n    echo \"Branch '$branchName' not found. Cancelling.\"\r\n    exit 0\r\nfi\r\n\r\nsorted_data=$(echo \"$filtered_data\" | jq -s \"sort_by(.date)[]\")\r\nlast=$(echo \"$sorted_data\" | jq -s \"last\")\r\n\r\n# Extract necessary information from the filtered data\r\nfiles=$(echo \"$last\" | jq -c '.files[]')\r\nbuildId=$(echo \"$last\" | jq -r '.id')\r\n\r\nif [ \"$buildId\" == \"null\" ] || [ -z \"$buildId\" ]; then\r\n    echo \"Build ID cannot be found. Cancelling.\"\r\n    exit 0\r\nfi\r\n\r\necho \"Latest build id: $buildId\"\r\n\r\ncd \/mnt\/server\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\nmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\nif [ ! -f plugins ]; then\r\necho -e \"Creating plugins folder\"\r\nmkdir plugins\r\nfi\r\n\r\nfor file in $files; do\r\n    fileName=$(echo \"$file\" | jq -r '.fileName')\r\n    fileId=$(echo \"$file\" | jq -r '.id')\r\n    downloadLink=\"https:\/\/api.infernalsuite.com\/v1\/projects\/$project\/$buildId\/download\/$fileId\"\r\n\r\n    echo \"Downloading [$fileName] from $downloadLink\"\r\n\r\n    # Download file using curl\r\n    curl -o \"$fileName\" \"$downloadLink\"\r\n\r\n    echo \"Downloaded $fileName\"\r\n\t\r\n\tif [[ \"$fileName\" == plugin-* ]]; then\r\n        echo \"Moving $fileName to plugins folder\"\r\n        mv \"$fileName\" plugins\/\r\n    fi\r\ndone\r\n\r\nif [ ! -f server.properties ]; then\r\n\techo -e \"Downloading MC server.properties\"\r\n\tcurl -o server.properties https:\/\/raw.githubusercontent.com\/parkervcp\/eggs\/master\/minecraft\/java\/server.properties\r\nfi",
+            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will cancel the installation process.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "1.20.4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "asp-server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:\/^([\\w\\d._-]+)(\\.jar)$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Branch Name",
+            "description": "Branch name \r\nhttps:\/\/api.infernalsuite.com\/swagger\/index.html#operations-DynamicProject-get_v1_projects__projectSlug__mcversion__version__branches",
+            "env_variable": "BRANCH_NAME",
+            "default_value": "paper_upstream",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Project name",
+            "description": "Project name. i.e: asp, aspurpur, aspufferfish",
+            "env_variable": "PROJECT_NAME",
+            "default_value": "asp",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}
